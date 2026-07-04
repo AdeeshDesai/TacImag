@@ -1,0 +1,4 @@
+# @package _global_
+task_name: sorting
+# one shared dataset per task (ManiFeel HF zip), used by BOTH stages
+dataset_path: data/sorting_quan_Aug8

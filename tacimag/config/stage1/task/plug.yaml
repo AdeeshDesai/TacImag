@@ -1,0 +1,4 @@
+# @package _global_
+task_name: plug
+# one shared dataset per task (ManiFeel HF zip), used by BOTH stages
+dataset_path: data/plug_quan_Aug02

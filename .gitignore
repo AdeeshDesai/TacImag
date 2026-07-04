@@ -1,0 +1,32 @@
+# thirdparty is populated at install time (see install_tacimag.sh)
+thirdparty/*
+!thirdparty/.gitkeep
+
+# data / outputs / checkpoints
+data/*
+!data/.gitkeep
+outputs/
+wandb/
+logs/
+*.ckpt
+*.pt
+*.sif
+*.zarr
+
+# python
+__pycache__/
+*.pyc
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# media artifacts generated locally
+*.mp4
+!media/*.mp4
+*.npz
+
+# editors / os
+.vscode/
+.idea/
+.DS_Store

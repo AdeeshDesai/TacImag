@@ -1,0 +1,25 @@
+# @package _global_
+# Baseline: REAL tactile RGB (GelSight/Taxim) image from the sensor
+# (requires the sensor at deployment).
+tactile_mode: rgb_real
+
+shape_meta:
+  obs:
+    wrist:
+      shape: [3, 256, 256]
+      type: rgb
+    right_tactile_camera_taxim:
+      shape: [3, 320, 240]
+      type: rgb
+    state:
+      shape: [7]
+      type: low_dim
+  action:
+    shape: [6]
+
+policy:
+  stage1_ckpt_path: null
+  imagination_key: null
+  obs_encoder:
+    imagination_key: null
+    imagination_shape: null

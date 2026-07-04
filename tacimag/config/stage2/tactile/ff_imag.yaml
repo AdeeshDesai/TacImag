@@ -1,0 +1,27 @@
+# @package _global_
+# OURS: IMAGINED contact force field — the frozen stage-1 tacff model runs in
+# the loop and its output conditions the policy. No tactile sensor needed at
+# deployment.
+tactile_mode: ff_imag
+
+# stage-1 checkpoint (override on the CLI for a custom path:
+#   stage1_ckpt=/path/to/latest.ckpt)
+stage1_ckpt: data/checkpoints/stage1/tacff_${task.name}/latest.ckpt
+
+shape_meta:
+  obs:
+    wrist:
+      shape: [3, 256, 256]
+      type: rgb
+    state:
+      shape: [7]
+      type: low_dim
+  action:
+    shape: [6]
+
+policy:
+  stage1_ckpt_path: ${stage1_ckpt}
+  imagination_key: pred_tactile_force_field_right
+  obs_encoder:
+    imagination_key: pred_tactile_force_field_right
+    imagination_shape: [3, 10, 14]

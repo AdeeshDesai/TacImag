@@ -1,0 +1,25 @@
+# @package _global_
+# Baseline: REAL contact force field from the tactile sensor (requires the
+# sensor at deployment).
+tactile_mode: ff_real
+
+shape_meta:
+  obs:
+    wrist:
+      shape: [3, 256, 256]
+      type: rgb
+    tactile_force_field_right:
+      shape: [3, 10, 14]
+      type: rgb
+    state:
+      shape: [7]
+      type: low_dim
+  action:
+    shape: [6]
+
+policy:
+  stage1_ckpt_path: null
+  imagination_key: null
+  obs_encoder:
+    imagination_key: null
+    imagination_shape: null

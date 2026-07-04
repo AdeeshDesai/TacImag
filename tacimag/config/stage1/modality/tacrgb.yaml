@@ -1,0 +1,46 @@
+# @package _global_
+# Imagine the tactile RGB (GelSight/Taxim) image [3, 320, 240].
+# Diffusion runs on the 4x-downsampled image in normalized [-1,1] space
+# (DDPM, prediction_type=sample).
+modality_name: tacrgb
+target_key: right_tactile_camera_taxim
+layout: image
+target_normalize: true
+tactile_normalize: image_range
+
+shape_meta:
+  obs:
+    wrist:
+      shape: [3, 256, 256]
+      type: rgb
+    right_tactile_camera_taxim:
+      shape: [3, 320, 240]
+      type: tactile
+    state:
+      shape: [7]
+      type: low_dim
+  action:
+    shape: [6]
+
+# conditioning obs for the encoder (the tactile target excluded)
+cond_shape_meta:
+  obs:
+    wrist:
+      shape: [3, 256, 256]
+      type: rgb
+    state:
+      shape: [7]
+      type: low_dim
+  action:
+    shape: [6]
+
+policy:
+  noise_scheduler:
+    _target_: diffusers.schedulers.scheduling_ddpm.DDPMScheduler
+    num_train_timesteps: 100
+    beta_start: 0.0001
+    beta_end: 0.02
+    beta_schedule: squaredcos_cap_v2
+    variance_type: fixed_small
+    clip_sample: True
+    prediction_type: sample

@@ -1,0 +1,46 @@
+# @package _global_
+# Imagine the contact FORCE FIELD [3, 10, 14] (ch0 normal, ch1/2 shear).
+# Diffusion runs in raw force units (DDIM, prediction_type=sample).
+modality_name: tacff
+target_key: tactile_force_field_right
+layout: field
+target_normalize: false
+tactile_normalize: identity
+
+shape_meta:
+  obs:
+    wrist:
+      shape: [3, 256, 256]
+      type: rgb
+    tactile_force_field_right:
+      shape: [3, 10, 14]
+      type: tactile
+    state:
+      shape: [7]
+      type: low_dim
+  action:
+    shape: [6]
+
+# conditioning obs for the encoder (the tactile target excluded)
+cond_shape_meta:
+  obs:
+    wrist:
+      shape: [3, 256, 256]
+      type: rgb
+    state:
+      shape: [7]
+      type: low_dim
+  action:
+    shape: [6]
+
+policy:
+  noise_scheduler:
+    _target_: diffusers.schedulers.scheduling_ddim.DDIMScheduler
+    num_train_timesteps: 100
+    beta_start: 0.0001
+    beta_end: 0.02
+    beta_schedule: squaredcos_cap_v2
+    clip_sample: True
+    set_alpha_to_one: True
+    steps_offset: 0
+    prediction_type: sample

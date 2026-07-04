@@ -1,0 +1,162 @@
+# =============================================================================
+# TacImag STAGE 2 — train the manipulation Diffusion Policy
+#
+#   python train_stage2.py tactile=ff_imag  task=usb   # ours: imagined force field
+#   python train_stage2.py tactile=vision   task=usb   # baseline: vision only
+#   python train_stage2.py tactile=ff_real  task=usb   # baseline: real force field
+#   python train_stage2.py tactile=rgb_real task=usb   # baseline: real tactile RGB
+#   python train_stage2.py tactile=rgb_imag task=usb   # ours: imagined tactile RGB
+#
+# The `tactile` group is the only switch: it sets the obs shape_meta and, for
+# the *_imag modes, the frozen stage-1 checkpoint + injected obs key.
+# =============================================================================
+defaults:
+  - _self_
+  - tactile: vision
+  - task: usb
+
+name: tacimag_stage2
+_target_: manifeel.workspace.train_diffusion_unet_image_workspace.TrainDiffusionUnetImageWorkspace
+
+task_name: ${task.name}
+exp_name: ${tactile_mode}_${task.name}
+
+dataset_path: ${task.dataset_path}
+isaacgym_cfg_name: ${task.isaacgym_cfg_name}
+
+n_demo: 50
+horizon: 16
+n_obs_steps: 2
+n_action_steps: 8
+n_latency_steps: 0
+dataset_obs_steps: ${n_obs_steps}
+past_action_visible: False
+keypoint_visible_rate: 1.0
+obs_as_global_cond: True
+
+policy:
+  _target_: tacimag.policy.imagined_tactile_policy.DiffusionUnetImaginationPolicy
+
+  shape_meta: ${shape_meta}
+
+  # stage1_ckpt_path / imagination_key come from the tactile group
+
+  noise_scheduler:
+    _target_: diffusers.schedulers.scheduling_ddpm.DDPMScheduler
+    num_train_timesteps: 100
+    beta_start: 0.0001
+    beta_end: 0.02
+    beta_schedule: squaredcos_cap_v2
+    variance_type: fixed_small
+    clip_sample: True
+    prediction_type: epsilon
+
+  obs_encoder:
+    _target_: tacimag.policy.obs_encoder.ImaginationObsEncoder
+    shape_meta: ${shape_meta}
+    # imagination_key / imagination_shape come from the tactile group
+    rgb_model:
+      _target_: diffusion_policy.model.vision.model_getter.get_resnet
+      name: resnet18
+      weights: null
+    resize_shape: null
+    crop_shape: null
+    random_crop: True
+    use_group_norm: True
+    share_rgb_model: False
+    imagenet_norm: True
+
+  horizon: ${horizon}
+  n_action_steps: ${eval:'${n_action_steps}+${n_latency_steps}'}
+  n_obs_steps: ${n_obs_steps}
+  num_inference_steps: 100
+  obs_as_global_cond: ${obs_as_global_cond}
+  diffusion_step_embed_dim: 128
+  down_dims: [512, 1024, 2048]
+  kernel_size: 5
+  n_groups: 8
+  cond_predict_scale: True
+
+ema:
+  _target_: diffusion_policy.model.diffusion.ema_model.EMAModel
+  update_after_step: 0
+  inv_gamma: 1.0
+  power: 0.75
+  min_value: 0.0
+  max_value: 0.9999
+
+dataloader:
+  batch_size: 8
+  num_workers: 3
+  shuffle: True
+  pin_memory: True
+  persistent_workers: False
+
+val_dataloader:
+  batch_size: 8
+  num_workers: 1
+  shuffle: False
+  pin_memory: True
+  persistent_workers: False
+
+optimizer:
+  _target_: torch.optim.AdamW
+  lr: 8.0e-5
+  betas: [0.95, 0.999]
+  eps: 1.0e-8
+  weight_decay: 1.0e-6
+
+training:
+  device: "cuda:0"
+  seed: 42
+  debug: False
+  resume: True
+  lr_scheduler: cosine
+  lr_warmup_steps: 500
+  num_epochs: 500
+  gradient_accumulate_every: 1
+  # EMA destroys performance when used with BatchNorm;
+  # the encoders therefore use GroupNorm.
+  use_ema: True
+  rollout_every: 50
+  checkpoint_every: 5
+  val_every: 10000
+  sample_every: 10000
+  max_train_steps: null
+  max_val_steps: null
+  tqdm_interval_sec: 1.0
+  freeze_encoder: false
+
+logging:
+  project: tacimag_stage2
+  resume: True
+  mode: online
+  name: ${exp_name}_seed${training.seed}
+  tags: ["${name}", "${tactile_mode}", "${task_name}"]
+  id: null
+  group: null
+
+checkpoint:
+  topk:
+    monitor_key: train_loss
+    mode: min
+    k: 5
+    format_str: 'epoch={epoch:04d}-train_loss={train_loss:.3f}.ckpt'
+  save_last_ckpt: True
+  save_last_snapshot: False
+
+multi_run:
+  run_dir: data/outputs/stage2/${exp_name}/${training.seed}
+  wandb_name_base: ${exp_name}_seed${training.seed}
+
+hydra:
+  # NOTE: ManiFeel's config dir (isaacgym_config_*.yaml, composed by its env
+  # runner at rollout time) is added to the search path by
+  # hydra_plugins/tacimag_searchpath_plugin.py.
+  job:
+    override_dirname: ${name}
+  run:
+    dir: data/outputs/stage2/${exp_name}/${training.seed}
+  sweep:
+    dir: data/outputs/stage2/${exp_name}/${training.seed}
+    subdir: ${hydra.job.num}

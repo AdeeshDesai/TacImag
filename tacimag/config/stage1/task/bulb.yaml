@@ -1,0 +1,4 @@
+# @package _global_
+task_name: bulb
+# one shared dataset per task (ManiFeel HF zip), used by BOTH stages
+dataset_path: data/bulb_quan_Sep19

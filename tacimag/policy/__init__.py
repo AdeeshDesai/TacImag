@@ -1,0 +1,2 @@
+from tacimag.policy.obs_encoder import ImaginationObsEncoder
+from tacimag.policy.imagined_tactile_policy import DiffusionUnetImaginationPolicy

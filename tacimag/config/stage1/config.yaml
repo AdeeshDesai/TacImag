@@ -1,0 +1,152 @@
+# =============================================================================
+# TacImag STAGE 1 — train the tactile imagination model
+#
+#   python train_stage1.py modality=tacff  task=usb    # imagine the force field
+#   python train_stage1.py modality=tacrgb task=usb    # imagine the tactile RGB
+#
+# The `modality` group is the only switch: it sets the target key/shape, the
+# diffusion layout & normalization, and the noise scheduler.
+# =============================================================================
+defaults:
+  - _self_
+  - modality: tacff
+  - task: usb
+
+name: tacimag_stage1
+_target_: tacimag.imagination.workspace.TrainImaginationWorkspace
+
+exp_name: ${modality_name}_${task_name}
+
+horizon: 1
+n_obs_steps: 1
+n_action_steps: 1
+n_latency_steps: 0
+dataset_obs_steps: ${n_obs_steps}
+obs_as_global_cond: True
+
+policy:
+  _target_: tacimag.imagination.policy.DiffusionImaginationPolicy
+
+  shape_meta: ${shape_meta}
+  target_key: ${target_key}
+  layout: ${layout}
+  target_normalize: ${target_normalize}
+  downsample_factor: 4
+
+  # noise_scheduler comes from the modality group
+
+  imagine_obs_encoder:
+    _target_: diffusion_policy.model.vision.multi_image_obs_encoder.MultiImageObsEncoder
+    shape_meta: ${cond_shape_meta}   # conditioning obs only (no tactile target)
+    rgb_model:
+      _target_: diffusion_policy.model.vision.model_getter.get_resnet
+      name: resnet18
+      weights: null
+    resize_shape: null
+    crop_shape: null
+    random_crop: True
+    use_group_norm: True
+    share_rgb_model: False
+    imagenet_norm: True
+
+  horizon: ${horizon}
+  n_action_steps: ${eval:'${n_action_steps}+${n_latency_steps}'}
+  n_obs_steps: ${n_obs_steps}
+  num_inference_steps: 10
+  obs_as_global_cond: ${obs_as_global_cond}
+  diffusion_step_embed_dim: 128
+  down_dims: [512, 1024, 2048]
+  kernel_size: 5
+  n_groups: 8
+  cond_predict_scale: True
+
+task:
+  dataset:
+    _target_: tacimag.imagination.dataset.ImaginationDataset
+    shape_meta: ${shape_meta}
+    dataset_path: ${dataset_path}
+    horizon: ${horizon}
+    pad_before: ${eval:'${n_obs_steps}-1+${n_latency_steps}'}
+    pad_after: ${eval:'${n_action_steps}-1'}
+    n_obs_steps: ${dataset_obs_steps}
+    n_latency_steps: ${n_latency_steps}
+    use_cache: True
+    seed: 42
+    val_ratio: 0.02
+    max_train_episodes: null
+    tactile_normalize: ${tactile_normalize}
+
+ema:
+  _target_: diffusion_policy.model.diffusion.ema_model.EMAModel
+  update_after_step: 0
+  inv_gamma: 1.0
+  power: 0.75
+  min_value: 0.0
+  max_value: 0.9999
+
+dataloader:
+  batch_size: 64
+  num_workers: 8
+  shuffle: True
+  pin_memory: True
+  persistent_workers: False
+
+val_dataloader:
+  batch_size: 64
+  num_workers: 8
+  shuffle: False
+  pin_memory: True
+  persistent_workers: False
+
+optimizer:
+  _target_: torch.optim.AdamW
+  lr: 1.0e-4
+  betas: [0.95, 0.999]
+  eps: 1.0e-8
+  weight_decay: 1.0e-6
+
+training:
+  device: "cuda:0"
+  seed: 42
+  debug: False
+  resume: True
+  lr_scheduler: cosine
+  lr_warmup_steps: 500
+  num_epochs: 200
+  gradient_accumulate_every: 1
+  # EMA destroys performance when used with BatchNorm;
+  # the encoder therefore uses GroupNorm.
+  use_ema: True
+  checkpoint_every: 10
+  sample_every: 5
+  max_train_steps: null
+  max_val_steps: null
+  tqdm_interval_sec: 1.0
+
+logging:
+  project: tacimag_stage1
+  resume: True
+  mode: online
+  name: ${exp_name}
+  tags: ["${name}", "${modality_name}", "${task_name}"]
+  id: null
+  group: null
+
+checkpoint:
+  save_ckpt: True
+  topk:
+    monitor_key: test_mean_score
+    mode: max
+    k: 5
+    format_str: 'epoch={epoch:04d}-test_mean_score={test_mean_score:.3f}.ckpt'
+  save_last_ckpt: True
+  save_last_snapshot: False
+
+hydra:
+  job:
+    override_dirname: ${name}
+  run:
+    dir: data/outputs/stage1/${exp_name}/${training.seed}
+  sweep:
+    dir: data/outputs/stage1/${exp_name}/${training.seed}
+    subdir: ${hydra.job.num}
