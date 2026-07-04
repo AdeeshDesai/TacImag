@@ -29,14 +29,21 @@ mkdir -p "${DATA_DIR}"
 for task in "${TASKS[@]}"; do
     name="${DS[$task]:-}"
     [ -z "${name}" ] && { echo "unknown task: ${task} (tasks: ${!DS[*]})"; exit 1; }
-    if [ -d "${DATA_DIR}/${name}/data" ]; then
+    if [ -f "${DATA_DIR}/${name}/meta/episode_ends/.zarray" ]; then
         echo "✓ ${name} already present"
         continue
     fi
+    # a directory without the marker file above is a broken previous attempt
+    rm -rf "${DATA_DIR:?}/${name}"
     echo "Downloading ${name}.zip ..."
-    curl -L --fail -C - "${HF_BASE}/${name}.zip" -o "${DATA_DIR}/${name}.zip"
+    curl -L --fail -C - "${HF_BASE}/${name}.zip" -o "${DATA_DIR}/${name}.zip.part"
+    mv "${DATA_DIR}/${name}.zip.part" "${DATA_DIR}/${name}.zip"
     echo "Extracting ..."
     unzip -q -o "${DATA_DIR}/${name}.zip" -d "${DATA_DIR}"
+    if [ ! -f "${DATA_DIR}/${name}/meta/episode_ends/.zarray" ]; then
+        echo "ERROR: ${name} extracted incompletely; delete data/${name} and retry." >&2
+        exit 1
+    fi
     rm -f "${DATA_DIR}/${name}.zip"
     echo "✓ data/${name}"
 done
