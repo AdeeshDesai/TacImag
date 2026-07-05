@@ -11,7 +11,7 @@ Touch-Informed Manipulation via Imagined Tactile Representations</h2>
 
 <p align="center">
 <a href="https://zhangzhiyuanzhang.github.io/personal_website/">Zhiyuan Zhang</a>*,
-<a href="https://scholar.google.com/citations?user=A880yg0AAAAJ&hl=en&oi=ao">Adeesh Mahesh Desai</a>*,
+<a href="https://scholar.google.com/citations?user=A880yg0AAAAJ&hl=en&oi=ao">Adeesh Desai</a>*,
 <a href="https://vict0rhu.github.io/">Jyun-Chi Hu</a>,
 <a href="https://www.linkedin.com/in/yosuke-saka-446410283/?locale=en">Yosuke Saka</a>,
 <a href="https://quan-luu.github.io/">Quan Khanh Luu</a>,
@@ -137,7 +137,7 @@ TacImag/
 ```bibtex
 @article{zhang2026tacimag,
   title={Imagining the Sense of Touch: Touch-Informed Manipulation via Imagined Tactile Representations},
-  author={Zhang, Zhiyuan and Desai, Adeesh Mahesh and Hu, Jyun-Chi and Saka, Yosuke and Luu, Quan Khanh and Lei, Jiuzhou and Soleymanzadeh, Davood and Zhang, Bihao and Zheng, Minghui and She, Yu},
+  author={Zhang, Zhiyuan and Desai, Adeesh and Hu, Jyun-Chi and Saka, Yosuke and Luu, Quan Khanh and Lei, Jiuzhou and Soleymanzadeh, Davood and Zhang, Bihao and Zheng, Minghui and She, Yu},
   journal={arXiv preprint arXiv:2607.01684},
   year={2026}
 }
