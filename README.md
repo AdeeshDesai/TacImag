@@ -26,11 +26,12 @@ Touch-Informed Manipulation via Imagined Tactile Representations</h2>
 </p>
 
 <p style="width: 80%; margin: 0 auto; text-align: justify;">
-<strong>TacImag</strong> lets a manipulation policy <em>imagine</em> its sense of touch.
-A frozen vision-to-touch diffusion model hallucinates the tactile signal (a contact
-force field or a tactile RGB image) from vision and proprioception, and a diffusion
-policy conditions on the imagined touch. <strong>No tactile sensor is needed at
-deployment.</strong>
+<strong>TacImag</strong> enables a manipulation policy to <em>imagine</em> its sense of touch.
+During training, paired visual-tactile demonstrations supervise a vision-to-touch diffusion model.
+At deployment, the frozen model predicts task-relevant tactile representations
+(either a tactile force field or a tactile RGB image) from vision, and a diffusion
+policy conditions on the imagined touch.
+<strong>No tactile sensor is required at deployment.</strong>
 </p>
 
 ## Highlights
