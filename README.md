@@ -35,7 +35,7 @@ policy conditions on the imagined touch.
 </p>
 
 <p align="center">
-<img src="media/real_imag.gif" alt="TacImag: touch without tactile sensors" width="90%" />
+<img src="media/sim_denoising.gif" alt="TacImag: imagining tactile signals via diffusion denoising" width="90%" />
 </p>
 
 ## Highlights
