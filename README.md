@@ -35,9 +35,8 @@ policy conditions on the imagined touch.
 </p>
 
 <p align="center">
-<video src="https://raw.githubusercontent.com/AdeeshDesai/TacImag/main/media/real_imag.mp4" width="70%" autoplay loop muted playsinline controls></video>
+<img src="media/real_imag.gif" alt="Mechanism: touch without tactile sensors" width="80%" />
 </p>
-<p align="center"><em>Mechanism: touch without tactile sensors &mdash; imagined tactile signals guiding real-world manipulation.</em></p>
 
 ## Highlights
 
