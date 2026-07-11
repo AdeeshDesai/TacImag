@@ -34,6 +34,11 @@ policy conditions on the imagined touch.
 <strong>No tactile sensor is required at deployment.</strong>
 </p>
 
+<p align="center">
+<video src="https://raw.githubusercontent.com/AdeeshDesai/TacImag/main/media/real_imag.mp4" width="70%" autoplay loop muted playsinline controls></video>
+</p>
+<p align="center"><em>Mechanism: touch without tactile sensors &mdash; imagined tactile signals guiding real-world manipulation.</em></p>
+
 ## Highlights
 
 - **Tactile imagination**: touch is predicted, not sensed. Stage 1 imagines the
