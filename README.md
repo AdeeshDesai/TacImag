@@ -34,11 +34,9 @@ policy conditions on the imagined touch.
 <strong>No tactile sensor is required at deployment.</strong>
 </p>
 
-
-
-https://github.com/user-attachments/assets/fb94f91b-2abd-4846-a431-d7608f41b9b2
-
-
+<p align="center">
+<img src="media/real_imag.gif" alt="TacImag: touch without tactile sensors" width="90%" />
+</p>
 
 ## Highlights
 
